@@ -85,7 +85,7 @@ const App = () => {
       const blogs = queryClient.getQueryData(['blogs'])
       queryClient.setQueryData(
         ['blogs'],
-        [...blogs].map((blog) =>
+        blogs.map((blog) =>
           blog.id === result.id
             ? {
                 ...result,
@@ -117,8 +117,8 @@ const App = () => {
     newBlogMutation.mutate(newBlog)
   }
 
-  const updateBlog = async (id, updatedBlog) => {
-    updateBlogMutation.mutate(id, updatedBlog) // TODO !!! FIX ME !!!
+  const updateBlog = async (id, blog) => {
+    updateBlogMutation.mutate({ id, blog })
   }
 
   const deleteBlog = async (id) => {

@@ -20,7 +20,7 @@ const create = async (blog) => {
   return response.data
 }
 
-const update = async (id, blog) => {
+const update = async ({ id, blog }) => {
   const config = {
     headers: { Authorization: token },
   }
