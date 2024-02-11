@@ -9,7 +9,6 @@ import Togglable from './components/Togglable'
 import NotificationContext from './NotificationContext'
 
 const App = () => {
-  // const [blogs, setBlogsUnsorted] = useState([])
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
@@ -142,7 +141,7 @@ const App = () => {
     return <div>loading data...</div>
   }
 
-  const blogs = result.data
+  const blogs = setBlogs(result.data)
 
   if (user === null) {
     return (
