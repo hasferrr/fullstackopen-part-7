@@ -20,7 +20,7 @@ const create = async (blog) => {
   return response.data
 }
 
-const update = async (id, blog) => {
+const update = async ({ id, blog }) => {
   const config = {
     headers: { Authorization: token },
   }
@@ -33,6 +33,7 @@ const deleteById = async (id) => {
     headers: { Authorization: token },
   }
   const response = await axios.delete(`${baseUrl}/${id}`, config)
+  response.data = { id }
   return response.data
 }
 

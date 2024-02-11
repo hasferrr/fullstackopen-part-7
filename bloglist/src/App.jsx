@@ -1,4 +1,5 @@
 import { useState, useEffect, useContext } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import Blog from './components/Blog'
 import blogService from './services/blogs'
 import loginService from './services/login'
@@ -8,15 +9,10 @@ import Togglable from './components/Togglable'
 import NotificationContext from './NotificationContext'
 
 const App = () => {
-  const [blogs, setBlogsUnsorted] = useState([])
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
   const [_, notificationDispatch] = useContext(NotificationContext)
-
-  useEffect(() => {
-    blogService.getAll().then((blogs) => setBlogs(blogs))
-  }, [])
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedUser')
@@ -26,12 +22,6 @@ const App = () => {
       blogService.setToken(loggedUser.token)
     }
   }, [])
-
-  const setBlogs = (value) => {
-    const sorted = [...value]
-    sorted.sort((a, b) => b.likes - a.likes)
-    setBlogsUnsorted(sorted)
-  }
 
   const handleLogin = async (event) => {
     event.preventDefault()
@@ -56,52 +46,102 @@ const App = () => {
     notificationDispatch({ type: 'CLEAR' })
   }
 
-  const createNewBlog = async (newBlog) => {
-    const result = await blogService.create(newBlog)
-    setBlogs([
-      ...blogs,
-      {
-        ...result,
-        user: {
-          id: result.user,
-          name: user.name,
-          username: user.username,
-        },
-      },
-    ])
-    showShortNotification(
-      `a new Blog ${result.title} by ${result.author}`,
-      'green'
-    )
-  }
+  // Query Client
+  const queryClient = useQueryClient()
 
-  const updateBlog = async (id, updatedBlog) => {
-    const result = await blogService.update(id, updatedBlog)
-    setBlogs(
-      [...blogs].map((blog) =>
-        blog.id === result.id
-          ? {
-              ...result,
-              user: {
-                id: result.user,
-                name: user.name,
-                username: user.username,
-              },
-            }
-          : blog
+  // Mutations
+  const newBlogMutation = useMutation({
+    mutationFn: blogService.create,
+    onSuccess: (result) => {
+      const blogs = queryClient.getQueryData(['blogs'])
+      queryClient.setQueryData(
+        ['blogs'],
+        blogs.concat({
+          ...result,
+          user: {
+            id: result.user,
+            name: user.name,
+            username: user.username,
+          },
+        })
       )
-    )
+      showShortNotification(
+        `a new Blog ${result.title} by ${result.author}`,
+        'green'
+      )
+    },
+  })
+
+  const updateBlogMutation = useMutation({
+    mutationFn: blogService.update,
+    onSuccess: (result) => {
+      const blogs = queryClient.getQueryData(['blogs'])
+      queryClient.setQueryData(
+        ['blogs'],
+        blogs.map((blog) =>
+          blog.id === result.id
+            ? {
+                ...result,
+                user: {
+                  id: result.user,
+                  name: user.name,
+                  username: user.username,
+                },
+              }
+            : blog
+        )
+      )
+    },
+  })
+
+  const deleteBlogMutation = useMutation({
+    mutationFn: blogService.deleteById,
+    onSuccess: (result) => {
+      const blogs = queryClient.getQueryData(['blogs'])
+      queryClient.setQueryData(
+        ['blogs'],
+        blogs.filter((blog) => blog.id !== result.id)
+      )
+    },
+  })
+
+  // Handler
+  const createNewBlog = (newBlog) => {
+    newBlogMutation.mutate(newBlog)
   }
 
-  const deleteBlog = async (id) => {
-    await blogService.deleteById(id)
-    setBlogs([...blogs].filter((blog) => blog.id !== id))
+  const updateBlog = (id, blog) => {
+    updateBlogMutation.mutate({ id, blog })
   }
 
+  const deleteBlog = (id) => {
+    deleteBlogMutation.mutate(id)
+  }
+
+  // Helpers
   const showShortNotification = (text, color) => {
     notificationDispatch({ type: 'SET', payload: { text, color } })
     setTimeout(() => notificationDispatch({ type: 'CLEAR' }), 5000)
   }
+
+  const setBlogs = (value) => {
+    const sorted = [...value]
+    sorted.sort((a, b) => b.likes - a.likes)
+    return sorted
+  }
+
+  // Use Query
+  const result = useQuery({
+    queryKey: ['blogs'],
+    queryFn: blogService.getAll,
+    refetchOnWindowFocus: false,
+  })
+
+  if (result.isLoading) {
+    return <div>loading data...</div>
+  }
+
+  const blogs = setBlogs(result.data)
 
   if (user === null) {
     return (
