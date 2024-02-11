@@ -7,18 +7,21 @@ import Notification from './components/Notification'
 import BlogForm from './components/BlogForm'
 import Togglable from './components/Togglable'
 import NotificationContext from './NotificationContext'
+import { useUserDispatch, useUserValue } from './UserContext'
 
 const App = () => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [user, setUser] = useState(null)
   const [_, notificationDispatch] = useContext(NotificationContext)
+
+  const user = useUserValue()
+  const userDispatch = useUserDispatch()
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedUser')
     if (loggedUserJSON) {
       const loggedUser = JSON.parse(loggedUserJSON)
-      setUser(loggedUser)
+      userDispatch({ type: 'SET', payload: loggedUser })
       blogService.setToken(loggedUser.token)
     }
   }, [])
@@ -30,8 +33,7 @@ const App = () => {
       const loggedUser = await loginService.login({ username, password })
       window.localStorage.setItem('loggedUser', JSON.stringify(loggedUser))
       blogService.setToken(loggedUser.token)
-
-      setUser(loggedUser)
+      userDispatch({ type: 'SET', payload: loggedUser })
       setUsername('')
       setPassword('')
       notificationDispatch({ type: 'CLEAR' })
@@ -42,7 +44,7 @@ const App = () => {
 
   const handleLogout = () => {
     window.localStorage.clear()
-    setUser(null)
+    userDispatch({ type: 'SET', payload: null })
     notificationDispatch({ type: 'CLEAR' })
   }
 
