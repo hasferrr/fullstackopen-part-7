@@ -33,6 +33,7 @@ const deleteById = async (id) => {
     headers: { Authorization: token },
   }
   const response = await axios.delete(`${baseUrl}/${id}`, config)
+  response.data = { id }
   return response.data
 }
 

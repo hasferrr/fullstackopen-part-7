@@ -107,7 +107,7 @@ const App = () => {
       const blogs = queryClient.getQueryData(['blogs'])
       queryClient.setQueryData(
         ['blogs'],
-        [...blogs].filter((blog) => blog.id !== result.id)
+        blogs.filter((blog) => blog.id !== result.id)
       )
     },
   })
@@ -122,7 +122,7 @@ const App = () => {
   }
 
   const deleteBlog = async (id) => {
-    deleteBlogMutation.mutate(id) // TODO !!! FIX ME !!!
+    deleteBlogMutation.mutate(id)
   }
 
   // Helpers
