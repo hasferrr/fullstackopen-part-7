@@ -1,17 +1,18 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useContext } from 'react'
 import Blog from './components/Blog'
 import blogService from './services/blogs'
 import loginService from './services/login'
 import Notification from './components/Notification'
 import BlogForm from './components/BlogForm'
 import Togglable from './components/Togglable'
+import NotificationContext from './NotificationContext'
 
 const App = () => {
   const [blogs, setBlogsUnsorted] = useState([])
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
-  const [notification, setNotification] = useState(null)
+  const [_, notificationDispatch] = useContext(NotificationContext)
 
   useEffect(() => {
     blogService.getAll().then((blogs) => setBlogs(blogs))
@@ -43,7 +44,7 @@ const App = () => {
       setUser(loggedUser)
       setUsername('')
       setPassword('')
-      setNotification(null)
+      notificationDispatch({ type: 'CLEAR' })
     } catch (error) {
       showShortNotification('wrong username or password', 'red')
     }
@@ -52,7 +53,7 @@ const App = () => {
   const handleLogout = () => {
     window.localStorage.clear()
     setUser(null)
-    setNotification(null)
+    notificationDispatch({ type: 'CLEAR' })
   }
 
   const createNewBlog = async (newBlog) => {
@@ -98,15 +99,15 @@ const App = () => {
   }
 
   const showShortNotification = (text, color) => {
-    setNotification({ text, color })
-    setTimeout(() => setNotification(null), 5000)
+    notificationDispatch({ type: 'SET', payload: { text, color } })
+    setTimeout(() => notificationDispatch({ type: 'CLEAR' }), 5000)
   }
 
   if (user === null) {
     return (
       <div>
         <h2>log in to application</h2>
-        <Notification notification={notification} />
+        <Notification />
         <form onSubmit={handleLogin}>
           <div>
             username
@@ -139,7 +140,7 @@ const App = () => {
   return (
     <div>
       <h2>blogs</h2>
-      <Notification notification={notification} />
+      <Notification />
       <p>
         {user.name} logged in
         <button onClick={handleLogout}>logout</button>

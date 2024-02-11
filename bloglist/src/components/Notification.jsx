@@ -1,6 +1,9 @@
+import { useContext } from 'react'
 import './Notification.css'
+import NotificationContext from '../NotificationContext'
 
-const Notification = ({ notification }) => {
+const Notification = () => {
+  const [notification] = useContext(NotificationContext)
   if (notification) {
     const { text, color } = notification
     return (
