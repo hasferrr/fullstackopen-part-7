@@ -12,7 +12,8 @@ import User from './components/User'
 import Users from './components/Users'
 import NotificationContext from './NotificationContext'
 import { useUserDispatch, useUserValue } from './UserContext'
-import { Route, Routes, useMatch } from 'react-router-dom'
+import { Link, Route, Routes, useMatch } from 'react-router-dom'
+import './App.css'
 
 const App = () => {
   const [username, setUsername] = useState('')
@@ -214,16 +215,19 @@ const App = () => {
 
   return (
     <div>
-      <h2>Blogs</h2>
-      <Notification />
-      <p>
+      <nav className="nav">
+        <Link to="/blogs">blogs</Link>
+        <Link to="/users">users</Link>
         {user.name} logged in
         <button onClick={handleLogout}>logout</button>
-      </p>
+      </nav>
+
+      <h2>Blog App</h2>
+      <Notification />
 
       <Routes>
         <Route
-          path="/"
+          path="/users"
           element={
             <>
               <h2>Users</h2>
@@ -252,7 +256,7 @@ const App = () => {
       <br />
 
       <Routes>
-        <Route path="/" element={<Blogs blogs={blogs} />}></Route>
+        <Route path="/blogs" element={<Blogs blogs={blogs} />}></Route>
         <Route
           path="/blogs/:id"
           element={
