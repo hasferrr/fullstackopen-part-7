@@ -1,8 +1,32 @@
 import PropTypes from 'prop-types'
 import { useUserValue } from '../UserContext'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 const Blog = ({ blog, updateBlog, deleteBlog }) => {
   const user = useUserValue()
+
+  const queryClient = useQueryClient()
+  const updateCommentsintheFrontend = useMutation({
+    mutationFn: (c) => c,
+    onSuccess: (result) => {
+      const blogs = queryClient.getQueryData(['blogs'])
+      queryClient.setQueryData(
+        ['blogs'],
+        blogs.map((blog) =>
+          blog.id === result.id
+            ? {
+                ...result,
+                user: {
+                  id: result.user,
+                  name: blog.user.name,
+                  username: blog.user.username,
+                },
+              }
+            : blog
+        )
+      )
+    },
+  })
 
   if (!blog) {
     return null
@@ -24,6 +48,15 @@ const Blog = ({ blog, updateBlog, deleteBlog }) => {
     }
   }
 
+  const handleAddComment = (event) => {
+    event.preventDefault()
+    const comment = event.target.comment.value
+    updateCommentsintheFrontend.mutate({
+      ...blog,
+      comments: blog.comments ? [...blog.comments, comment] : [comment],
+    })
+  }
+
   return (
     <div>
       <h2>{blog.title}</h2>
@@ -42,6 +75,10 @@ const Blog = ({ blog, updateBlog, deleteBlog }) => {
       </div>
 
       <h3>comments</h3>
+      <form onSubmit={handleAddComment}>
+        <input type="text" name="comment" />
+        <button type="submit">add comment</button>
+      </form>
       <ul>
         {blog.comments
           ? blog.comments.map((comment, index) => (
