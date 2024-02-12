@@ -7,9 +7,11 @@ import userService from './services/users'
 import Notification from './components/Notification'
 import BlogForm from './components/BlogForm'
 import Togglable from './components/Togglable'
+import User from './components/User'
 import Users from './components/Users'
 import NotificationContext from './NotificationContext'
 import { useUserDispatch, useUserValue } from './UserContext'
+import { Route, Routes, useMatch } from 'react-router-dom'
 
 const App = () => {
   const [username, setUsername] = useState('')
@@ -28,6 +30,10 @@ const App = () => {
     }
   }, [])
 
+  // Use Match
+  const match = useMatch('/users/:id')
+
+  // Login handler
   const handleLogin = async (event) => {
     event.preventDefault()
 
@@ -213,9 +219,26 @@ const App = () => {
         <button onClick={handleLogout}>logout</button>
       </p>
 
-      <h2>Users</h2>
-      <Users users={users} />
-      <br />
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <>
+              <h2>Users</h2>
+              <Users users={users} />
+              <br />
+            </>
+          }
+        />
+        <Route
+          path="/users/:id"
+          element={
+            <User
+              user={match ? users.find((u) => u.id === match.params.id) : null}
+            />
+          }
+        />
+      </Routes>
 
       <Togglable label="new blog">
         <BlogForm createNewBlog={createNewBlog} />
