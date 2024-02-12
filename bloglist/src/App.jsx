@@ -13,6 +13,7 @@ import Users from './components/Users'
 import NotificationContext from './NotificationContext'
 import { useUserDispatch, useUserValue } from './UserContext'
 import { Link, Route, Routes, useMatch, useNavigate } from 'react-router-dom'
+import { Button, Container, TextField } from '@mui/material'
 import './App.css'
 
 const App = () => {
@@ -185,13 +186,13 @@ const App = () => {
 
   if (user === null) {
     return (
-      <div>
-        <h2>log in to application</h2>
+      <Container>
+        <h2>Log in to application</h2>
         <Notification />
         <form onSubmit={handleLogin}>
           <div>
-            username
-            <input
+            <TextField
+              label="username"
               id="username"
               type="text"
               value={username}
@@ -199,8 +200,8 @@ const App = () => {
             />
           </div>
           <div>
-            password
-            <input
+            <TextField
+              label="password"
               id="password"
               type="password"
               value={password}
@@ -208,23 +209,25 @@ const App = () => {
             />
           </div>
           <div>
-            <button id="login-button" type="submit">
+            <Button variant="contained" id="login-button" type="submit">
               login
-            </button>
+            </Button>
           </div>
         </form>
-      </div>
+      </Container>
     )
   }
 
   return (
-    <div>
+    <Container>
       <nav className="nav">
-        <Link to="/blogs">blogs</Link>
-        <Link to="/users">users</Link>
+        <Link to="/blogs">Blogs</Link>
+        <Link to="/users">Users</Link>
         <div>
           {user.name} logged in
-          <button onClick={handleLogout}>logout</button>
+          <Button size="small" variant="contained" onClick={handleLogout}>
+            logout
+          </Button>
         </div>
       </nav>
 
@@ -278,7 +281,7 @@ const App = () => {
           }
         />
       </Routes>
-    </div>
+    </Container>
   )
 }
 

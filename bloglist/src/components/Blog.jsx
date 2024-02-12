@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types'
 import { useUserValue } from '../UserContext'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { Button, TextField } from '@mui/material'
 
 const Blog = ({ blog, updateBlog, deleteBlog }) => {
   const user = useUserValue()
@@ -55,6 +56,7 @@ const Blog = ({ blog, updateBlog, deleteBlog }) => {
       ...blog,
       comments: blog.comments ? [...blog.comments, comment] : [comment],
     })
+    event.target.comment.value = ''
   }
 
   return (
@@ -64,11 +66,15 @@ const Blog = ({ blog, updateBlog, deleteBlog }) => {
         <a href={blog.url}>{blog.url}</a>
         <div>
           likes {blog.likes}
-          <button onClick={incrementLike}>like</button>
+          <Button size="small" variant="contained" onClick={incrementLike}>
+            like
+          </Button>
         </div>
         <div>added by {blog.user.name}</div>
         {user.username === blog.user.username ? (
-          <button onClick={handleDelete}>remove</button>
+          <Button size="small" variant="contained" onClick={handleDelete}>
+            remove
+          </Button>
         ) : (
           <></>
         )}
@@ -76,8 +82,12 @@ const Blog = ({ blog, updateBlog, deleteBlog }) => {
 
       <h3>comments</h3>
       <form onSubmit={handleAddComment}>
-        <input type="text" name="comment" />
-        <button type="submit">add comment</button>
+        <div>
+          <TextField size="small" label="comment" type="text" name="comment" />
+          <Button variant="contained" type="submit">
+            add comment
+          </Button>
+        </div>
       </form>
       <ul>
         {blog.comments
