@@ -12,7 +12,7 @@ import User from './components/User'
 import Users from './components/Users'
 import NotificationContext from './NotificationContext'
 import { useUserDispatch, useUserValue } from './UserContext'
-import { Link, Route, Routes, useMatch } from 'react-router-dom'
+import { Link, Route, Routes, useMatch, useNavigate } from 'react-router-dom'
 import './App.css'
 
 const App = () => {
@@ -31,6 +31,8 @@ const App = () => {
       blogService.setToken(loggedUser.token)
     }
   }, [])
+
+  const navigate = useNavigate()
 
   // Use Match
   const userMatch = useMatch('/users/:id')
@@ -89,6 +91,7 @@ const App = () => {
         `a new Blog ${result.title} by ${result.author}`,
         'green'
       )
+      navigate(`/blogs/${result.id}`)
     },
   })
 
@@ -104,8 +107,8 @@ const App = () => {
                 ...result,
                 user: {
                   id: result.user,
-                  name: user.name,
-                  username: user.username,
+                  name: blog.user.name,
+                  username: blog.user.username,
                 },
               }
             : blog
@@ -131,6 +134,7 @@ const App = () => {
             : u
         )
       )
+      navigate('/blogs')
     },
   })
 
@@ -218,8 +222,10 @@ const App = () => {
       <nav className="nav">
         <Link to="/blogs">blogs</Link>
         <Link to="/users">users</Link>
-        {user.name} logged in
-        <button onClick={handleLogout}>logout</button>
+        <div>
+          {user.name} logged in
+          <button onClick={handleLogout}>logout</button>
+        </div>
       </nav>
 
       <h2>Blog App</h2>
