@@ -3,9 +3,11 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import Blog from './components/Blog'
 import blogService from './services/blogs'
 import loginService from './services/login'
+import userService from './services/users'
 import Notification from './components/Notification'
 import BlogForm from './components/BlogForm'
 import Togglable from './components/Togglable'
+import Users from './components/Users'
 import NotificationContext from './NotificationContext'
 import { useUserDispatch, useUserValue } from './UserContext'
 
@@ -67,6 +69,13 @@ const App = () => {
           },
         })
       )
+      const users = queryClient.getQueryData(['users'])
+      queryClient.setQueryData(
+        ['users'],
+        users.map((u) =>
+          u.id === result.user ? { ...u, blogs: [...u.blogs, result] } : u
+        )
+      )
       showShortNotification(
         `a new Blog ${result.title} by ${result.author}`,
         'green'
@@ -104,6 +113,15 @@ const App = () => {
         ['blogs'],
         blogs.filter((blog) => blog.id !== result.id)
       )
+      const users = queryClient.getQueryData(['users'])
+      queryClient.setQueryData(
+        ['users'],
+        users.map((u) =>
+          u.username === user.username
+            ? { ...u, blogs: u.blogs.filter((blog) => blog.id !== result.id) }
+            : u
+        )
+      )
     },
   })
 
@@ -133,17 +151,24 @@ const App = () => {
   }
 
   // Use Query
-  const result = useQuery({
+  const blogsResult = useQuery({
     queryKey: ['blogs'],
     queryFn: blogService.getAll,
     refetchOnWindowFocus: false,
   })
 
-  if (result.isLoading) {
+  const usersResult = useQuery({
+    queryKey: ['users'],
+    queryFn: userService.getAll,
+    refetchOnWindowFocus: false,
+  })
+
+  if (blogsResult.isLoading || usersResult.isLoading) {
     return <div>loading data...</div>
   }
 
-  const blogs = setBlogs(result.data)
+  const blogs = setBlogs(blogsResult.data)
+  const users = usersResult.data
 
   if (user === null) {
     return (
@@ -181,12 +206,16 @@ const App = () => {
 
   return (
     <div>
-      <h2>blogs</h2>
+      <h2>Blogs</h2>
       <Notification />
       <p>
         {user.name} logged in
         <button onClick={handleLogout}>logout</button>
       </p>
+
+      <h2>Users</h2>
+      <Users users={users} />
+      <br />
 
       <Togglable label="new blog">
         <BlogForm createNewBlog={createNewBlog} />
