@@ -1,9 +1,12 @@
 import PropTypes from 'prop-types'
-import { useState } from 'react'
-import './Blog.css'
+import { useUserValue } from '../UserContext'
 
-const Blog = ({ blog, updateBlog, deleteBlog, user }) => {
-  const [visible, setVisible] = useState(false)
+const Blog = ({ blog, updateBlog, deleteBlog }) => {
+  const user = useUserValue()
+
+  if (!blog) {
+    return null
+  }
 
   const incrementLike = () => {
     updateBlog(blog.id, {
@@ -22,14 +25,9 @@ const Blog = ({ blog, updateBlog, deleteBlog, user }) => {
   }
 
   return (
-    <div className="blog">
+    <div>
+      <h2>{blog.title}</h2>
       <div>
-        {blog.title} by {blog.author}
-        <button onClick={() => setVisible(!visible)}>
-          {visible ? 'hide' : 'show'}
-        </button>
-      </div>
-      <div style={{ display: visible ? '' : 'none' }}>
         <a href={blog.url}>{blog.url}</a>
         <div>
           likes {blog.likes}
@@ -47,7 +45,7 @@ const Blog = ({ blog, updateBlog, deleteBlog, user }) => {
 }
 
 Blog.propTypes = {
-  blog: PropTypes.object.isRequired,
+  blog: PropTypes.object,
   updateBlog: PropTypes.func.isRequired,
   deleteBlog: PropTypes.func.isRequired,
 }

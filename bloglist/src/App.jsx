@@ -1,6 +1,7 @@
 import { useState, useEffect, useContext } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import Blog from './components/Blog'
+import Blogs from './components/Blogs'
 import blogService from './services/blogs'
 import loginService from './services/login'
 import userService from './services/users'
@@ -31,7 +32,8 @@ const App = () => {
   }, [])
 
   // Use Match
-  const match = useMatch('/users/:id')
+  const userMatch = useMatch('/users/:id')
+  const blogMatch = useMatch('/blogs/:id')
 
   // Login handler
   const handleLogin = async (event) => {
@@ -234,7 +236,11 @@ const App = () => {
           path="/users/:id"
           element={
             <User
-              user={match ? users.find((u) => u.id === match.params.id) : null}
+              user={
+                userMatch
+                  ? users.find((u) => u.id === userMatch.params.id)
+                  : null
+              }
             />
           }
         />
@@ -245,15 +251,23 @@ const App = () => {
       </Togglable>
       <br />
 
-      {blogs.map((blog) => (
-        <Blog
-          key={blog.id}
-          blog={blog}
-          updateBlog={updateBlog}
-          deleteBlog={deleteBlog}
-          user={user}
+      <Routes>
+        <Route path="/" element={<Blogs blogs={blogs} />}></Route>
+        <Route
+          path="/blogs/:id"
+          element={
+            <Blog
+              blog={
+                blogMatch
+                  ? blogs.find((blog) => blog.id === blogMatch.params.id)
+                  : null
+              }
+              updateBlog={updateBlog}
+              deleteBlog={deleteBlog}
+            />
+          }
         />
-      ))}
+      </Routes>
     </div>
   )
 }
